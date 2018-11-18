@@ -1,6 +1,8 @@
-FROM golang:latest
-COPY ./ /go/src/github.com/armsnyder/somethings-funny/sampler/
-RUN env GOOS=linux GOARCH=arm GOARM=7 go build github.com/armsnyder/somethings-funny/sampler
-FROM arm32v7/busybox:latest
-COPY --from=0 /go/sampler /usr/local/bin/sampler
-CMD ["/usr/local/bin/sampler"]
+FROM armsnyder/arm32v7-golang-cross:latest
+RUN apt-get update && apt-get install -y portaudio19-dev
+RUN go get github.com/gordonklaus/portaudio
+RUN go get github.com/aws/aws-sdk-go
+RUN go get github.com/orcaman/writerseeker
+RUN go get github.com/mjibson/go-dsp/fft
+COPY ./ $HOME/go/src/github.com/armsnyder/somethings-funny/sampler/
+CMD ["sh", "-c", "go build github.com/armsnyder/somethings-funny/sampler && ./sampler"]
