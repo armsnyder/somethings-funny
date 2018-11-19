@@ -16,6 +16,6 @@ ssh -o StrictHostKeychecking=no -i "${PI_KEY_PATH}" "${PI_USERNAME}"@"${PI_ADDRE
   echo Renaming previous container && \
   docker rename $CONTAINER $CONTAINER-$(date +%s); fi && \
   echo Starting new container && \
-  docker run -d --restart always --name $CONTAINER --device /dev/snd -v /home/$PI_USERNAME/mic:/mic \
+  docker run -d --restart unless-stopped --name $CONTAINER --device /dev/snd -v /home/$PI_USERNAME/mic:/mic \
   -e AWS_REGION=$AWS_REGION -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e SQS_URL=$SQS_URL \
   -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e BUCKET_NAME=$BUCKET_NAME $IMAGE"
