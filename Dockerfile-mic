@@ -1,0 +1,15 @@
+FROM arm32v7/golang:1.12 as builder
+WORKDIR /workdir
+COPY go.mod go.mod
+COPY go.sum go.sum
+RUN go mod download
+RUN apt-get update && apt-get install -y portaudio19-dev
+RUN go get github.com/gordonklaus/portaudio
+COPY common common
+COPY mic mic
+RUN go build ./mic/main.go
+
+FROM arm32v7/debian:latest
+RUN apt-get update && apt-get install -y libportaudio2
+COPY --from=builder /workdir/main /usr/local/bin/mic
+CMD ["/usr/local/bin/mic"]

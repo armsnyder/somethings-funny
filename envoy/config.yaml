@@ -1,0 +1,122 @@
+node:
+  cluster: somethings-funny
+  id: somethings-funny
+static_resources:
+  listeners:
+    - address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 443
+      filter_chains:
+        - tls_context:
+            common_tls_context:
+              tls_certificate_sds_secret_configs:
+                name: cert
+                sds_config:
+                  api_config_source:
+                    api_type: grpc
+                    grpc_services:
+                      - envoy_grpc:
+                          cluster_name: sds
+          filters:
+            - name: envoy.http_connection_manager
+              config:
+                codec_type: auto
+                stat_prefix: ingress_https
+                route_config:
+                  name: local_route
+                  virtual_hosts:
+                    - name: service
+                      domains:
+                        - "*"
+                      routes:
+                        - match:
+                            prefix: /
+                          route:
+                            cluster: service
+                http_filters:
+                  - name: envoy.filters.http.jwt_authn
+                    config:
+                      providers:
+                        default:
+                          issuer: default
+                          local_jwks:
+                            filename: /jwt/jwks.json
+                      rules:
+                        - match:
+                            prefix: /register-pi
+                          requires:
+                            provider_and_audiences:
+                              provider_name: default
+                              audiences:
+                                - pi_unit
+                        - match:
+                            prefix: /upload
+                          requires:
+                            provider_and_audiences:
+                              provider_name: default
+                              audiences:
+                                - sampler
+                        - match:
+                            prefix: /
+                          requires:
+                            provider_name: default
+                  - name: envoy.router
+    - address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 80
+      filter_chains:
+        - filters:
+            - name: envoy.http_connection_manager
+              config:
+                codec_type: auto
+                stat_prefix: ingress_http
+                route_config:
+                  name: local_route
+                  virtual_hosts:
+                    - name: acme
+                      domains:
+                        - "*"
+                      routes:
+                        - match:
+                            prefix: /.well-known/acme-challenge/
+                          route:
+                            cluster: acme
+                        - match:
+                            prefix: /
+                          redirect:
+                            https_redirect: true
+                http_filters:
+                  - name: envoy.router
+  clusters:
+    - name: service
+      connect_timeout: 1s
+      type: static
+      hosts:
+        - socket_address:
+            address: 127.0.0.1
+            port_value: 8080
+    - name: sds
+      connect_timeout: 1s
+      type: static
+      http2_protocol_options: {}
+      hosts:
+        - socket_address:
+            address: 127.0.0.1
+            port_value: 10962
+    - name: auth
+      connect_timeout: 1s
+      type: static
+      http2_protocol_options: {}
+      hosts:
+        - socket_address:
+            address: 127.0.0.1
+            port_value: 21856
+    - name: acme
+      connect_timeout: 1s
+      type: static
+      hosts:
+        - socket_address:
+            address: 127.0.0.1
+            port_value: 30328

@@ -1,0 +1,13 @@
+FROM arm32v7/golang:1.12 as builder
+WORKDIR /workdir
+COPY go.mod go.mod
+COPY go.sum go.sum
+RUN go mod download
+COPY common common
+COPY sampler sampler
+RUN go build ./sampler/main.go
+
+FROM arm32v7/debian:latest
+RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
+COPY --from=builder /workdir/main /usr/local/bin/sampler
+CMD ["/usr/local/bin/sampler"]

@@ -1,0 +1,101 @@
+[
+  {
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/somethings-funny",
+        "awslogs-region": "${region}",
+        "awslogs-stream-prefix": "ecs"
+      }
+    },
+    "portMappings": [
+      {
+        "hostPort": 8080,
+        "protocol": "tcp",
+        "containerPort": 8080
+      }
+    ],
+    "environment": [
+      {
+        "name": "HOSTED_ZONE",
+        "value": "${hosted_zone}"
+      },
+      {
+        "name": "SERVICE_DOMAIN",
+        "value": "${domain}"
+      },
+      {
+        "name": "PI_DOMAIN",
+        "value": "${pi_domain}"
+      },
+      {
+        "name": "BUCKET",
+        "value": "${bucket_name}"
+      }
+    ],
+    "image": "${account_id}.dkr.ecr.${region}.amazonaws.com/somethings-funny/service:latest",
+    "name": "service"
+  },
+  {
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/somethings-funny",
+        "awslogs-region": "${region}",
+        "awslogs-stream-prefix": "ecs"
+      }
+    },
+    "portMappings": [
+      {
+        "hostPort": 10962,
+        "protocol": "tcp",
+        "containerPort": 10962
+      },
+      {
+        "hostPort": 30328,
+        "protocol": "tcp",
+        "containerPort": 30328
+      }
+    ],
+    "environment": [
+      {
+        "name": "BUCKET",
+        "value": "${bucket_name}"
+      },
+      {
+        "name": "DOMAIN",
+        "value": "${domain}"
+      },
+      {
+        "name": "STAGING",
+        "value": "false"
+      }
+    ],
+    "image": "${account_id}.dkr.ecr.${region}.amazonaws.com/somethings-funny/sds:latest",
+    "name": "sds"
+  },
+  {
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/somethings-funny",
+        "awslogs-region": "${region}",
+        "awslogs-stream-prefix": "ecs"
+      }
+    },
+    "portMappings": [
+      {
+        "hostPort": 80,
+        "protocol": "tcp",
+        "containerPort": 80
+      },
+      {
+        "hostPort": 443,
+        "protocol": "tcp",
+        "containerPort": 443
+      }
+    ],
+    "image": "${account_id}.dkr.ecr.${region}.amazonaws.com/somethings-funny/envoy:latest",
+    "name": "envoy"
+  }
+]

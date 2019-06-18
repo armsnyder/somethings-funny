@@ -1,3 +1,10 @@
 .idea
-env.sh
+.env
 downloads
+.terraform
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.tfstate.lock.info
+key.pub
+key.pem
+jwks.json
